@@ -4,10 +4,11 @@ namespace Bowling
 {
     public class Player
     {
-        public int Score => 5;
+        public int Score { get; private set; }
 
-        public void Roll(int knockedCount)
+        internal void AddScore(int pins)
         {
+            Score += pins;
         }
     }
 }
