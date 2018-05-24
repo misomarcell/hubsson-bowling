@@ -10,9 +10,9 @@ namespace BowlingTests
     {
         private GameBuilder gameBuilder;
 
-        private IRunningGame StartTestGame()
+        private IRunningGame StartTestGame(byte playerCount = 1)
         {
-            gameBuilder.AddPlayer(new Player());
+            Enumerable.Range(0, playerCount).ToList().ForEach(x => gameBuilder.AddPlayer(new Player()));
             var runningGame = gameBuilder.Start();
             return runningGame;
         }
@@ -77,7 +77,7 @@ namespace BowlingTests
         }
         
         [TestMethod]
-        public void ScoreCanBeRetrieveAfterRoll()
+        public void ScoreCanBeRetrievedAfterRoll()
         {
             Player player = new Player();
             gameBuilder.AddPlayer(player);
@@ -88,6 +88,39 @@ namespace BowlingTests
             Assert.AreEqual(5, player.Score);
         }
 
-        // JÓZSI: the next test is adding two players; the first one rolls twice, and the next active player should be the second one
+        [TestMethod]
+        public void FrameIsFinished_NextPlayerIsActive()
+        {
+            var player1 = new Player();
+            var player2 = new Player();
+            gameBuilder.AddPlayer(player1);
+            gameBuilder.AddPlayer(player2);
+            var game = gameBuilder.Start();
+
+            game.Roll(5);
+            game.Roll(1);
+
+            Assert.AreEqual(player2, game.ActivePlayer);
+        }
+
+        [TestMethod]
+        public void RoundIsFinished_FirstPlayerIsActive()
+        {
+            var player1 = new Player();
+            var player2 = new Player();
+            gameBuilder.AddPlayer(player1);
+            gameBuilder.AddPlayer(player2);
+            var game = gameBuilder.Start();
+
+            game.Roll(5);
+            game.Roll(1);
+
+            game.Roll(2);
+            game.Roll(3);
+
+            Assert.AreEqual(player1, game.ActivePlayer);
+
+
+        }
     }
 }

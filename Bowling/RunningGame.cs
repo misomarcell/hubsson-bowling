@@ -1,27 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace Bowling
 {
     internal class RunningGame : IRunningGame
     {
-        private readonly ICollection<Player> players = new List<Player>();
+        private readonly IList<Player> players = new List<Player>();
 
-        public RunningGame(ICollection<Player> players)
+        public Player ActivePlayer => playerEnumerator.Current;
+
+        private readonly IEnumerator<Player> playerEnumerator;
+
+        public RunningGame(IList<Player> players)
         {
             this.players = players;
+            playerEnumerator = GetPlayer().GetEnumerator();
+            playerEnumerator.MoveNext();
         }
 
         public void Roll(int pins)
         {
-            var currentPlayer = GetCurrentPlayer();
-            currentPlayer.AddScore(pins);
+            ActivePlayer.AddScore(pins);
+            playerEnumerator.MoveNext();
         }
 
-        private Player GetCurrentPlayer()
+        public IEnumerable<Player> GetPlayer()
         {
-            return players.ElementAt(0); // TODO: Implement this
+            while (true)
+            {
+                foreach (var player in players)
+                {
+                    yield return player;
+                    yield return player;
+                }
+            }
         }
     }
 }

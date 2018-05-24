@@ -27,7 +27,7 @@ namespace Bowling
             if (!HasPlayers())
                 throw new InvalidOperationException("Game cannot be started without players. Please add at least one before starting the game.");
 
-            return new RunningGame(players);
+            return new RunningGame(players.ToList());
         }
 
         private bool HasPlayers() => players.Any();
