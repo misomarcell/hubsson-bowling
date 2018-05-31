@@ -88,6 +88,8 @@ namespace BowlingTests
             Assert.AreEqual(5, player.Score);
         }
 
+        // TODO: Fix this /\ : Norbi jön!!!!
+
         [TestMethod]
         public void FrameIsFinished_NextPlayerIsActive()
         {
@@ -119,8 +121,17 @@ namespace BowlingTests
             game.Roll(3);
 
             Assert.AreEqual(player1, game.ActivePlayer);
+        }
 
+        [TestMethod]
+        public void FirstPlayerKeepsScoreAfterSecondRound()
+        {
+            var runningGame = StartTestGame(2);
+            runningGame.Roll(5);
+            runningGame.Roll(6);
+            runningGame.Roll(7);
 
+            Assert.AreEqual(11, runningGame.GetScoreOf(runningGame.Players[0]));
         }
     }
 }

@@ -1,38 +1,45 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Bowling
 {
     internal class RunningGame : IRunningGame
     {
-        private readonly IList<Player> players = new List<Player>();
-
-        public Player ActivePlayer => playerEnumerator.Current;
-
-        private readonly IEnumerator<Player> playerEnumerator;
+        public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
+        public IList<Player> Players { get; }
+        private readonly List<Roll> scoreBoard;
+        private int currentRollIndex = 0;
 
         public RunningGame(IList<Player> players)
         {
-            this.players = players;
-            playerEnumerator = GetPlayer().GetEnumerator();
-            playerEnumerator.MoveNext();
+            scoreBoard = CreateScoreBoard(players);
+            Players = players.ToImmutableList();
         }
 
         public void Roll(int pins)
         {
-            ActivePlayer.AddScore(pins);
-            playerEnumerator.MoveNext();
+            scoreBoard[currentRollIndex].Pins = pins;
+            currentRollIndex++;
         }
 
-        public IEnumerable<Player> GetPlayer()
+        private static List<Roll> CreateScoreBoard(IList<Player> p)
         {
-            while (true)
+            var newScoreBoard = new List<Roll>();
+            for (int i = 0; i < 10; i++)
             {
-                foreach (var player in players)
+                foreach (var player in p)
                 {
-                    yield return player;
-                    yield return player;
+                    newScoreBoard.Add(new Roll(player));
+                    newScoreBoard.Add(new Roll(player));
                 }
             }
+            return newScoreBoard;
+        }
+
+        public int GetScoreOf(Player player)
+        {
+            return scoreBoard.Where(r => r.Player == player && r.Pins.HasValue).Sum(r => r.Pins.Value);
         }
     }
 }
