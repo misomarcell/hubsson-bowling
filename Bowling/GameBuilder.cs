@@ -22,6 +22,14 @@ namespace Bowling
             players.Add(player);
         }
 
+        public void AddPlayer(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException(nameof(name));
+
+            AddPlayer(new Player(name));
+        }
+
         public IRunningGame Start()
         {
             if (!HasPlayers())

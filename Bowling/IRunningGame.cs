@@ -9,5 +9,8 @@ namespace Bowling
 
         void Roll(int pins);
         int GetScoreOf(Player player);
+        int GetScoreOf(string name);
+
+        string Winner { get; }
     }
 }

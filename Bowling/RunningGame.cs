@@ -8,6 +8,17 @@ namespace Bowling
     {
         public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
         public IList<Player> Players { get; }
+
+        public string Winner => GetWinner();
+
+        private string GetWinner()
+        {
+            if (currentRollIndex < scoreBoard.Count)
+                throw new GameIsNotFinishedYetException();
+
+            return Players.OrderByDescending(GetScoreOf).First().Name;
+        }
+
         private readonly List<Roll> scoreBoard;
         private int currentRollIndex = 0;
 
@@ -41,5 +52,11 @@ namespace Bowling
         {
             return scoreBoard.Where(r => r.Player == player && r.Pins.HasValue).Sum(r => r.Pins.Value);
         }
+
+        public int GetScoreOf(string name)
+        {
+            return GetScoreOf(Players.Single(p => p.Name == name));
+        }
+
     }
 }

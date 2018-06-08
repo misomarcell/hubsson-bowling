@@ -51,9 +51,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlayerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GameTest.cs" />
+    <Compile Include="ModuleTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
