@@ -7,13 +7,16 @@ namespace Bowling
     internal class RunningGame : IRunningGame
     {
         public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
+
         public IList<Player> Players { get; }
 
         public string Winner => GetWinner();
 
+        private bool IsGameFinished => currentRollIndex >= scoreBoard.Count;
+        
         private string GetWinner()
         {
-            if (currentRollIndex < scoreBoard.Count)
+            if (!IsGameFinished)
                 throw new GameIsNotFinishedYetException();
 
             return Players.OrderByDescending(GetScoreOf).First().Name;
@@ -30,6 +33,9 @@ namespace Bowling
 
         public void Roll(int pins)
         {
+            if (IsGameFinished)
+                throw new GameAlreadyFinishedException();
+
             scoreBoard[currentRollIndex].Pins = pins;
             currentRollIndex++;
         }

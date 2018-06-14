@@ -3,6 +3,14 @@ using System.Linq;
 using Bowling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+//TODO: [] Implement strike & other related logics
+//TODO: [x] Handle end game
+//TODO: [] Rewrite tests to n or xUnit
+//TODO: [] Handle multiple games (vigze át a pontokat)
+//TODO: [] Handle draws
+//TODO: [] Handle player reorder
+//TODO: [] Rewrite program to F#
+
 namespace BowlingTests
 {
     [TestClass]
@@ -80,7 +88,7 @@ namespace BowlingTests
 
             Assert.IsInstanceOfType(runningGame, typeof(IRunningGame));
         }
-        
+
         [TestMethod]
         public void ScoreCanBeRetrievedAfterRoll()
         {
@@ -153,6 +161,38 @@ namespace BowlingTests
             var game = StartTestGame("Sanyi", "Attila");
 
             Assert.ThrowsException<GameIsNotFinishedYetException>(() => game.Winner);
+        }
+
+        [TestMethod]
+        public void CannotRollAfterTenFrames()
+        {
+            var game = StartTestGame("John");
+            PlayFrames(game, 10, _ => 1);
+            Assert.ThrowsException<GameAlreadyFinishedException>(() => game.Roll(5));
+        }
+
+        [DataTestMethod]
+        [DataRow(28, new[] { 10, 7, 2 })]
+        [DataRow(18, new[] { 9, 0, 7, 2 })]
+        [DataRow(44, new[] { 10, 10, 5, 2 })]
+        public void StrikeHandledCorrectly(int expectedScore, int[] rolls)
+        {
+            var game = StartTestGame("John");
+            foreach(var roll in rolls)
+            {
+                game.Roll(roll);
+            }
+
+            Assert.AreEqual(expectedScore, game.GetScoreOf("John"));
+        }
+
+        [TestMethod]
+        public void NextPlayerAfterStrike()
+        {
+            var game = StartTestGame("Misi", "Timi");
+
+            game.Roll(10);
+            Assert.AreEqual("Timi", game.ActivePlayer.Name);
         }
 
         private static void PlayFrames(IRunningGame game, int frameCount, Func<string, int> scores)
