@@ -1,38 +1,68 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Bowling
 {
     internal class RunningGame : IRunningGame
     {
-        private readonly IList<Player> players = new List<Player>();
+        public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
 
-        public Player ActivePlayer => playerEnumerator.Current;
+        public IList<Player> Players { get; }
 
-        private readonly IEnumerator<Player> playerEnumerator;
+        public string Winner => GetWinner();
+
+        private bool IsGameFinished => currentRollIndex >= scoreBoard.Count;
+        
+        private string GetWinner()
+        {
+            if (!IsGameFinished)
+                throw new GameIsNotFinishedYetException();
+
+            return Players.OrderByDescending(GetScoreOf).First().Name;
+        }
+
+        private readonly List<Roll> scoreBoard;
+        private int currentRollIndex = 0;
 
         public RunningGame(IList<Player> players)
         {
-            this.players = players;
-            playerEnumerator = GetPlayer().GetEnumerator();
-            playerEnumerator.MoveNext();
+            scoreBoard = CreateScoreBoard(players);
+            Players = players.ToImmutableList();
         }
 
         public void Roll(int pins)
         {
-            ActivePlayer.AddScore(pins);
-            playerEnumerator.MoveNext();
+            if (IsGameFinished)
+                throw new GameAlreadyFinishedException();
+
+            scoreBoard[currentRollIndex].Pins = pins;
+            currentRollIndex++;
         }
 
-        public IEnumerable<Player> GetPlayer()
+        private static List<Roll> CreateScoreBoard(IList<Player> p)
         {
-            while (true)
+            var newScoreBoard = new List<Roll>();
+            for (int i = 0; i < 10; i++)
             {
-                foreach (var player in players)
+                foreach (var player in p)
                 {
-                    yield return player;
-                    yield return player;
+                    newScoreBoard.Add(new Roll(player));
+                    newScoreBoard.Add(new Roll(player));
                 }
             }
+            return newScoreBoard;
         }
+
+        public int GetScoreOf(Player player)
+        {
+            return scoreBoard.Where(r => r.Player == player && r.Pins.HasValue).Sum(r => r.Pins.Value);
+        }
+
+        public int GetScoreOf(string name)
+        {
+            return GetScoreOf(Players.Single(p => p.Name == name));
+        }
+
     }
 }
