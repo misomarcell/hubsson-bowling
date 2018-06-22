@@ -7,13 +7,27 @@ namespace Bowling
     internal class RunningGame : IRunningGame
     {
         public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
-
+        public bool IsLastRollOfGame => currentRollIndex == scoreBoard.Count - 1;
+        public bool IsFirstRollOfPlayer => NextPlayerToRoll == ActivePlayer;
+        private Player NextPlayerToRoll => IsLastRollOfGame ? null : scoreBoard[currentRollIndex + 1].Player;
         public IList<Player> Players { get; }
-
         public string Winner => GetWinner();
-
         private bool IsGameFinished => currentRollIndex >= scoreBoard.Count;
-        
+        public bool PreviousFrameOfPlayasWasAStrike
+        {
+            get
+            {
+                var ignorePreviousRolls = IsFirstRollOfPlayer ? 0 : 1;
+                var previousRollsOfPlayer = scoreBoard.Take(currentRollIndex - ignorePreviousRolls).Where(x => x.Player == ActivePlayer);
+
+                if (!previousRollsOfPlayer.Any())
+                    return false;
+
+                return !previousRollsOfPlayer.Last().Pins.HasValue;
+            }
+        }
+
+
         private string GetWinner()
         {
             if (!IsGameFinished)
@@ -36,8 +50,17 @@ namespace Bowling
             if (IsGameFinished)
                 throw new GameAlreadyFinishedException();
 
-            scoreBoard[currentRollIndex].Pins = pins;
-            currentRollIndex++;
+            var currentRoll = scoreBoard[currentRollIndex];
+            currentRoll.Pins = pins;
+            
+            if (PreviousFrameOfPlayasWasAStrike)
+                currentRoll.Pins += 10;
+
+            if (currentRoll.IsStrike && IsFirstRollOfPlayer)
+                // STRIKE
+                currentRollIndex += 2;
+            else
+               currentRollIndex++;
         }
 
         private static List<Roll> CreateScoreBoard(IList<Player> p)

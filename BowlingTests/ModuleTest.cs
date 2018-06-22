@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 //TODO: [] Implement strike & other related logics
 //TODO: [x] Handle end game
 //TODO: [] Rewrite tests to n or xUnit
-//TODO: [] Handle multiple games (vigze át a pontokat)
+//TODO: [] Handle multiple games (vigye át a pontokat)
 //TODO: [] Handle draws
 //TODO: [] Handle player reorder
 //TODO: [] Rewrite program to F#
@@ -177,13 +177,13 @@ namespace BowlingTests
         [DataRow(44, new[] { 10, 10, 5, 2 })]
         public void StrikeHandledCorrectly(int expectedScore, int[] rolls)
         {
-            var game = StartTestGame("John");
+            var game = StartTestGame("Norbi");
             foreach(var roll in rolls)
             {
                 game.Roll(roll);
             }
 
-            Assert.AreEqual(expectedScore, game.GetScoreOf("John"));
+            Assert.AreEqual(expectedScore, game.GetScoreOf("Norbi"));
         }
 
         [TestMethod]
