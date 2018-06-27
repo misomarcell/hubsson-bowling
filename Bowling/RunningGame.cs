@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -13,20 +14,6 @@ namespace Bowling
         public IList<Player> Players { get; }
         public string Winner => GetWinner();
         private bool IsGameFinished => currentRollIndex >= scoreBoard.Count;
-        public bool PreviousFrameOfPlayasWasAStrike
-        {
-            get
-            {
-                var ignorePreviousRolls = IsFirstRollOfPlayer ? 0 : 1;
-                var previousRollsOfPlayer = scoreBoard.Take(currentRollIndex - ignorePreviousRolls).Where(x => x.Player == ActivePlayer);
-
-                if (!previousRollsOfPlayer.Any())
-                    return false;
-
-                return !previousRollsOfPlayer.Last().Pins.HasValue;
-            }
-        }
-
 
         private string GetWinner()
         {
@@ -52,15 +39,22 @@ namespace Bowling
 
             var currentRoll = scoreBoard[currentRollIndex];
             currentRoll.Pins = pins;
-            
-            if (PreviousFrameOfPlayasWasAStrike)
-                currentRoll.Pins += 10;
+
+            foreach (var pendingStrike in GetPendingStrikes())
+                pendingStrike.AddBonus(pins);
 
             if (currentRoll.IsStrike && IsFirstRollOfPlayer)
                 // STRIKE
                 currentRollIndex += 2;
             else
                currentRollIndex++;
+        }
+
+        private IEnumerable<Roll> GetPendingStrikes()
+        {
+            return scoreBoard
+                .Take(currentRollIndex)
+                .Where(x => x.Player == ActivePlayer && x.IsPendingStrike);
         }
 
         private static List<Roll> CreateScoreBoard(IList<Player> p)

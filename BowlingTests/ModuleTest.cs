@@ -3,7 +3,7 @@ using System.Linq;
 using Bowling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-//TODO: [] Implement strike & other related logics
+//TODO: [x] Implement strike & other related logics
 //TODO: [x] Handle end game
 //TODO: [] Rewrite tests to n or xUnit
 //TODO: [] Handle multiple games (vigye át a pontokat)
@@ -174,8 +174,10 @@ namespace BowlingTests
         [DataTestMethod]
         [DataRow(28, new[] { 10, 7, 2 })]
         [DataRow(18, new[] { 9, 0, 7, 2 })]
-        [DataRow(44, new[] { 10, 10, 5, 2 })]
-        public void StrikeHandledCorrectly(int expectedScore, int[] rolls)
+        [DataRow(49, new[] { 10, 10, 5, 2 })]
+        [DataRow(63, new[] { 10, 10, 5, 1, 10, 3, 0 })]
+        [DataRow(49, new[] { 3, 7, 3, 5, 0, 10, 9, 0 })]
+        public void StrikeAndSpareHandledCorrectly(int expectedScore, int[] rolls)
         {
             var game = StartTestGame("Norbi");
             foreach(var roll in rolls)
