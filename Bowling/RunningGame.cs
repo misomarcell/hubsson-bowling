@@ -7,13 +7,13 @@ namespace Bowling
 {
     internal class RunningGame : IRunningGame
     {
-        public Player ActivePlayer => scoreBoard[currentRollIndex].Player;
-        public bool IsLastRollOfGame => currentRollIndex == scoreBoard.Count - 1;
+        public Player ActivePlayer => scoreBoard[currentFrameIndex].Player;
+        public bool IsLastRollOfGame => currentFrameIndex == scoreBoard.Count - 1;
         public bool IsFirstRollOfPlayer => NextPlayerToRoll == ActivePlayer;
-        private Player NextPlayerToRoll => IsLastRollOfGame ? null : scoreBoard[currentRollIndex + 1].Player;
+        private Player NextPlayerToRoll => IsLastRollOfGame ? null : scoreBoard[currentFrameIndex + 1].Player;
         public IList<Player> Players { get; }
         public string Winner => GetWinner();
-        private bool IsGameFinished => currentRollIndex >= scoreBoard.Count;
+        private bool IsGameFinished => currentFrameIndex >= scoreBoard.Count;
 
         private string GetWinner()
         {
@@ -23,8 +23,8 @@ namespace Bowling
             return Players.OrderByDescending(GetScoreOf).First().Name;
         }
 
-        private readonly List<Roll> scoreBoard;
-        private int currentRollIndex = 0;
+        private readonly List<Frame> scoreBoard;
+        private int currentFrameIndex = 0;
 
         public RunningGame(IList<Player> players)
         {
@@ -37,35 +37,31 @@ namespace Bowling
             if (IsGameFinished)
                 throw new GameAlreadyFinishedException();
 
-            var currentRoll = scoreBoard[currentRollIndex];
-            currentRoll.Pins = pins;
+            var currentFrame = scoreBoard[currentFrameIndex];
+            currentFrame.Roll(pins);
 
-            foreach (var pendingStrike in GetPendingStrikes())
+            foreach (var pendingStrike in GetPendingFrames())
                 pendingStrike.AddBonus(pins);
 
-            if (currentRoll.IsStrike && IsFirstRollOfPlayer)
-                // STRIKE
-                currentRollIndex += 2;
-            else
-               currentRollIndex++;
+            if (currentFrame.IsFinished)
+                currentFrameIndex++;
         }
 
-        private IEnumerable<Roll> GetPendingStrikes()
+        private IEnumerable<Frame> GetPendingFrames()
         {
             return scoreBoard
-                .Take(currentRollIndex)
-                .Where(x => x.Player == ActivePlayer && x.IsPendingStrike);
+                .Take(currentFrameIndex)
+                .Where(x => x.Player == ActivePlayer && x.HasRemainingBonus);
         }
 
-        private static List<Roll> CreateScoreBoard(IList<Player> p)
+        private static List<Frame> CreateScoreBoard(IList<Player> p)
         {
-            var newScoreBoard = new List<Roll>();
+            var newScoreBoard = new List<Frame>();
             for (int i = 0; i < 10; i++)
             {
                 foreach (var player in p)
                 {
-                    newScoreBoard.Add(new Roll(player));
-                    newScoreBoard.Add(new Roll(player));
+                    newScoreBoard.Add(new Frame(player));                   
                 }
             }
             return newScoreBoard;
@@ -73,7 +69,9 @@ namespace Bowling
 
         public int GetScoreOf(Player player)
         {
-            return scoreBoard.Where(r => r.Player == player && r.Pins.HasValue).Sum(r => r.Pins.Value);
+            return scoreBoard
+                .Where(r => r.Player == player && r.Score.HasValue)
+                .Sum(r => r.Score.Value);
         }
 
         public int GetScoreOf(string name)

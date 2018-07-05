@@ -3,13 +3,13 @@ using System.Linq;
 using Bowling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-//TODO: [x] Implement strike & other related logics
+//TODO: [x] Implement strike & spare logics
 //TODO: [x] Handle end game
 //TODO: [] Rewrite tests to n or xUnit
-//TODO: [] Handle multiple games (vigye át a pontokat)
+//TODO: [] Handle multiple games (vigye át a pontokat) Forget clearing the sum variable
 //TODO: [] Handle draws
 //TODO: [] Handle player reorder
-//TODO: [] Rewrite program to F#
+
 
 namespace BowlingTests
 {
@@ -95,6 +95,7 @@ namespace BowlingTests
             var runningGame = StartTestGame("Sanyi");
 
             runningGame.Roll(5);
+            runningGame.Roll(0);
 
             Assert.AreEqual(5, runningGame.GetScoreOf("Sanyi"));
         }
